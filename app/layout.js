@@ -1,7 +1,7 @@
 import './globals.css'
 
 export const metadata = {
-  title: 'StepVersus - Epic Team Step Battle',
+  title: 'Mugen Watch Party',
   description: 'Competitive step tracking app with daily team matchups and epic battle arena',
 }
 
