@@ -20,7 +20,7 @@ export default function StreamViewer({ selectedCharacter }) {
           <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
           <span className="font-semibold text-foreground">LIVE NOW</span>
         </div>
-        <TwitchEmbed channel="saltybet" />
+        <TwitchEmbed channel="collinthao" />
         <p className="text-sm text-muted-foreground mb-3">
           Watch fighters battle in real-time Mugen matches. Place your bets and test your prediction skills!
         </p>
