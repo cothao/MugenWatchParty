@@ -55,37 +55,46 @@ export default function Index() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Left Sidebar - Bet Cards */}
-          <div className="lg:col-span-1 space-y-4">
-            <h2 className="text-lg font-bold text-foreground mb-4">Available Bets</h2>
-            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-card">
-              {mockCharacters.map((character) => (
-                <BetCard
-                  key={character.id}
-                  character={character}
-                  isSelected={selectedCharacter?.id === character.id}
-                  onBet={handleBetPlaced}
-                />
-              ))}
-            </div>
-          </div>
+<main className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
 
-          {/* Center - Stream Viewer */}
-          <div className="lg:col-span-2">
-            <StreamViewer selectedCharacter={selectedCharacter} />
-          </div>
+    {/* Left Sidebar */}
+    <div className="lg:col-span-1 space-y-4">
+      <h2 className="text-lg font-bold text-foreground mb-4">
+        Available Bets
+      </h2>
 
-          {/* Right Sidebar - Stats Table */}
-          <div className="lg:col-span-1">
-            <h2 className="text-lg font-bold text-foreground mb-4">Character Stats</h2>
-            <div className="bg-card rounded-lg border border-border overflow-hidden max-h-[600px] overflow-y-auto">
-              <CharacterStats stats={mockStats} />
-            </div>
-          </div>
-        </div>
-      </main>
+      <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-card">
+        {mockCharacters.map((character) => (
+          <BetCard
+            key={character.id}
+            character={character}
+            isSelected={selectedCharacter?.id === character.id}
+            onBet={handleBetPlaced}
+          />
+        ))}
+      </div>
+    </div>
+
+    {/* Center Stream */}
+    <div className="lg:col-span-3">
+      <StreamViewer selectedCharacter={selectedCharacter} />
+    </div>
+
+    {/* Right Stats */}
+    <div className="lg:col-span-2">
+      <h2 className="text-lg font-bold text-foreground mb-4">
+        Character Stats
+      </h2>
+
+      <div className="bg-card rounded-lg border border-border overflow-hidden max-h-[600px] overflow-y-auto">
+        <CharacterStats />
+      </div>
+    </div>
+
+  </div>
+</main>
+
     </div>
   );
 }

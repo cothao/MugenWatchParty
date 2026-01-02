@@ -58,7 +58,7 @@ export default function BetCard({ character, isSelected, onBet }) {
       {betAmount && parseFloat(betAmount) > 0 && (
         <div className="mb-4 p-2 bg-success/10 border border-success/20 rounded text-xs">
           <div className="text-muted-foreground">Potential Win</div>
-          <div className="text-success font-bold">
+          <div className="text-[hsl(var(--success))] font-bold">
             ${(parseFloat(betAmount) * character.odds).toFixed(2)}
           </div>
         </div>

@@ -1,95 +1,109 @@
+/** @import must precede all other statements */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --primary: 262 31% 20%; /* #282041 */
-  --primary-foreground: 0 0% 100%;
-  --muted: 0 0% 92%; /* #eaeaea */
-  --muted-foreground: 215.4 16.3% 46.9%;
-}
-
-body {
-  @apply bg-background text-foreground;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
 @layer base {
+  /**
+   * Tailwind CSS theme
+   * tailwind.config.ts expects the following color variables to be expressed as HSL values.
+   * A different format will require also updating the theme in tailwind.config.ts.
+  */
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --foreground: 222.2 84% 4.9%;
+
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 222.2 84% 4.9%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
     --radius: 0.5rem;
+
     --sidebar-background: 0 0% 98%;
+
     --sidebar-foreground: 240 5.3% 26.1%;
+
     --sidebar-primary: 240 5.9% 10%;
+
     --sidebar-primary-foreground: 0 0% 98%;
+
     --sidebar-accent: 240 4.8% 95.9%;
+
     --sidebar-accent-foreground: 240 5.9% 10%;
+
     --sidebar-border: 220 13% 91%;
+
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --success: 142.7 66% 46%;
+    --warning: 44 87% 54%;
+    --error: 0 84.2% 60.2%;
   }
+
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --background: 217 33% 8%;
+    --foreground: 213 97% 87%;
+
+    --card: 217 39% 13%;
+    --card-foreground: 213 97% 87%;
+
+    --popover: 217 39% 13%;
+    --popover-foreground: 213 97% 87%;
+
+    --primary: 264 90% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 264 60% 30%;
+    --secondary-foreground: 213 97% 87%;
+
+    --muted: 217 27% 30%;
+    --muted-foreground: 213 14% 60%;
+
+    --accent: 264 90% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 264 90% 50%;
+
+    --sidebar-background: 217 33% 8%;
+    --sidebar-foreground: 213 97% 87%;
+    --sidebar-primary: 264 90% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 217 39% 13%;
+    --sidebar-accent-foreground: 213 97% 87%;
+    --sidebar-border: 217 32% 17%;
+    --sidebar-ring: 264 90% 50%;
+
+    --success: 142.7 66% 46%;
+    --warning: 44 87% 54%;
+    --error: 0 84.2% 60.2%;
   }
 }
 
@@ -97,7 +111,101 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+
+  :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  pre,
+  code {
+    overflow-x: auto;
+    white-space: pre;
+  }
+}
+
+@layer components {
+  .bet-card {
+    @apply bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors cursor-pointer;
+  }
+
+  .bet-button {
+    @apply w-full py-2 px-3 rounded font-semibold transition-all;
+  }
+
+  .bet-button-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95;
+  }
+
+  .bet-button-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 active:scale-95;
+  }
+
+  .stats-table {
+    @apply w-full text-sm;
+  }
+
+  .stats-table thead {
+    @apply border-b border-border;
+  }
+
+  .stats-table th {
+    @apply px-4 py-3 text-left font-semibold text-muted-foreground;
+  }
+
+  .stats-table td {
+    @apply px-4 py-3;
+  }
+
+  .stats-table tbody tr {
+    @apply border-b border-border hover:bg-card/50 transition-colors;
+  }
+
+  .stream-placeholder {
+    @apply aspect-video bg-black rounded-lg flex items-center justify-center border border-border;
+  }
+
+  .character-name-display {
+    @apply font-bold text-lg text-foreground;
+  }
+
+  .odds-display {
+    @apply text-2xl font-bold text-primary;
+  }
+
+  .win-rate-positive {
+    @apply text-[hsl(var(--success))];
+  }
+
+  .win-rate-negative {
+    @apply text-[hsl(var(--error))];
+  }
+
+  .tier-badge {
+    @apply inline-block px-3 py-1 rounded font-semibold text-xs uppercase tracking-wider;
+  }
+
+  .tier-s {
+    @apply bg-red-500/20 text-red-400 border border-red-500/30;
+  }
+
+  .tier-a {
+    @apply bg-orange-500/20 text-orange-400 border border-orange-500/30;
+  }
+
+  .tier-b {
+    @apply bg-yellow-500/20 text-yellow-400 border border-yellow-500/30;
+  }
+
+  .tier-c {
+    @apply bg-blue-500/20 text-blue-400 border border-blue-500/30;
+  }  
+  
+  .tier-na {
+    @apply bg-gray-500/20 text-blue-400 border border-blue-500/30;
   }
 }

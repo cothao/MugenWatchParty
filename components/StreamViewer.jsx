@@ -4,7 +4,7 @@ export default function StreamViewer({ selectedCharacter }) {
   return (
     <div className="space-y-4">
       {/* Stream Container */}
-      <div className="stream-placeholder">
+      {/* <div className="stream-placeholder">
         <div className="text-center">
           <div className="text-4xl mb-2">🎮</div>
           <div className="text-muted-foreground">
@@ -12,7 +12,7 @@ export default function StreamViewer({ selectedCharacter }) {
             <p className="text-sm">Stream player placeholder</p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Live Info */}
       <div className="bg-card border border-border rounded-lg p-4">
@@ -47,7 +47,7 @@ export default function StreamViewer({ selectedCharacter }) {
             </div>
             <div>
               <div className="text-xs text-muted-foreground mb-1">Total Pool</div>
-              <div className="text-lg font-bold text-success">$12,453</div>
+              <div className="text-lg font-bold text-[hsl(var(--success))]">$12,453</div>
             </div>
           </div>
         </div>

@@ -1,83 +1,118 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 function CharacterStats() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const getTierColor = (tier) => {
+    switch (tier) {
+      case "S": return "tier-s";
+      case "A": return "tier-a";
+      case "B": return "tier-b";
+      case "C": return "tier-c";
+      default: return "tier-na";
+    }
+  };
+
+  const getWinRateColor = (winRate) => {
+    if (winRate >= 75) return "win-rate-positive";
+    if (winRate >= 50) return "text-warning";
+    return "win-rate-negative";
+  };
+
   useEffect(() => {
+    let ws;
+
+    // 1️⃣ Fetch initial stats first
     fetch("https://5qapdy5k29.execute-api.us-east-1.amazonaws.com/dev")
       .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json(); // Already returns JS object
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
       })
       .then((json) => {
-        // Convert object of characters into array for easy mapping
-        const characters = Object.keys(JSON.parse(json.body).characters).map((CharacterName) => ({
+        const body = JSON.parse(json.body);
+        const characters = Object.keys(body.characters).map((CharacterName) => ({
           CharacterName,
-          ...JSON.parse(json.body).characters[CharacterName], // spread wins, losses, winRate, tier
+          ...body.characters[CharacterName],
         }));
-        console.log(JSON.parse(json.body).characters);
         setData(characters);
         setLoading(false);
+
+        // 2️⃣ Only after initial stats, open WebSocket for live updates
+        ws = new WebSocket(
+          "wss://nhjft1ry2h.execute-api.us-east-1.amazonaws.com/production"
+        );
+
+        ws.onopen = () => console.log("WebSocket connected");
+
+        ws.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.type === "STATS_UPDATE") {
+              const characters = Object.keys(msg.data).map((CharacterName) => ({
+                CharacterName,
+                ...msg.data[CharacterName],
+              }));
+              setData(characters);
+            }
+          } catch (err) {
+            console.error("Invalid WebSocket message:", event.data);
+          }
+        };
+
+        ws.onerror = (err) => {
+          console.error("WebSocket error:", err);
+          setError(err);
+        };
+
+        ws.onclose = () => console.log("WebSocket closed");
       })
       .catch((err) => {
         console.error("Error fetching character data:", err);
         setError(err);
         setLoading(false);
       });
+
+    return () => ws?.close(); // Cleanup WebSocket on unmount
   }, []);
-
-  const getTierColor = (tier) => {
-    switch (tier) {
-      case 'S': return 'tier-s';
-      case 'A': return 'tier-a';
-      case 'B': return 'tier-b';
-      case 'C': return 'tier-c';
-      default: return 'tier-c';
-    }
-  };
-
-  const getWinRateColor = (winRate) => {
-    if (winRate >= 75) return 'win-rate-positive';
-    if (winRate >= 50) return 'text-warning';
-    return 'win-rate-negative';
-  };
 
   if (loading) return <p>Loading character stats...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <table className="stats-table">
+    <table className="stats-table table-fixed w-full">
       <thead>
         <tr>
-          <th className="w-1/2">Character</th>
-          <th className="text-center">W-L</th>
-          <th className="text-right">WR%</th>
+          <th className="w-2/3">Character</th>
+          <th className="w-1/6 text-center">W-L</th>
+          <th className="w-1/6 text-right">WR%</th>
         </tr>
       </thead>
       <tbody>
         {data.map((stat, index) => (
           <tr key={index}>
-            <td>
-              <div className="flex items-center gap-2">
-                <span className={`tier-badge ${getTierColor(stat.tier)}`}>
-                  {stat.Tier}
+            <td className="align-top">
+              <div className="flex items-start gap-2 min-w-0">
+                <span className={`tier-badge ${getTierColor(stat.Tier)} shrink-0`}>
+                  {stat.Tier || "N/A"}
                 </span>
-                <span className="text-sm font-medium text-foreground">
+                <span className="text-sm font-medium text-foreground break-all">
                   {stat.CharacterName}
                 </span>
               </div>
             </td>
-            <td className="text-center text-sm">
-              <span className="text-success">{stat.Wins}</span>
-              <span className="text-muted-foreground">-</span>
+            <td className="text-center text-sm whitespace-nowrap">
+              <span className="text-[hsl(var(--success))]">{stat.Wins}</span>
+              <span className="text-muted-foreground mx-1">-</span>
               <span className="text-error">{stat.Losses}</span>
             </td>
-            <td className={`text-right text-sm font-bold ${getWinRateColor(stat.WinRate)}`}>
-              {stat.WinRate}%
+            <td
+              className={`text-right text-sm font-bold whitespace-nowrap ${getWinRateColor(
+                stat.WinRate
+              )}`}
+            >
+              {typeof stat.WinRate === "number" ? `${stat.WinRate}%` : "N/A"}
             </td>
           </tr>
         ))}
