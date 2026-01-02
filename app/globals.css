@@ -208,4 +208,52 @@
   .tier-na {
     @apply bg-gray-500/20 text-blue-400 border border-blue-500/30;
   }
+  
+  .tier-dp {
+    @apply bg-indigo-500/20 text-indigo-400 border border-indigo-500/30;
+  }
+
+  .tier-d {
+    @apply bg-indigo-600/20 text-indigo-500 border border-indigo-600/30;
+  }
+
+  .tier-dm {
+    @apply bg-indigo-700/20 text-indigo-600 border border-indigo-700/30;
+  }
+
+  .tier-e {
+    @apply bg-purple-500/20 text-purple-400 border border-purple-500/30;
+  }
+
+  .tier-sss {
+    @apply bg-pink-500/20 text-pink-400 border border-pink-500/30;
+  }
+
+  .tier-ss {
+    @apply bg-red-600/20 text-red-500 border border-red-600/30;
+  }
+
+  .tier-ap {
+    @apply bg-orange-600/20 text-orange-500 border border-orange-600/30;
+  }
+
+  .tier-am {
+    @apply bg-orange-400/20 text-orange-300 border border-orange-400/30;
+  }
+
+  .tier-bp {
+    @apply bg-yellow-600/20 text-yellow-500 border border-yellow-600/30;
+  }
+
+  .tier-bm {
+    @apply bg-yellow-400/20 text-yellow-300 border border-yellow-400/30;
+  }
+
+  .tier-cp {
+    @apply bg-blue-600/20 text-blue-500 border border-blue-600/30;
+  }
+
+  .tier-cm {
+    @apply bg-blue-400/20 text-blue-300 border border-blue-400/30;
+  }
 }

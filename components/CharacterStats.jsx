@@ -8,10 +8,22 @@ function CharacterStats() {
   // Helper functions
   const getTierColor = (tier) => {
     switch (tier) {
+      case "SSS": return "tier-sss";
+      case "SS": return "tier-ss";
       case "S": return "tier-s";
+      case "A+": return "tier-ap";
       case "A": return "tier-a";
+      case "A-": return "tier-am";
+      case "B+": return "tier-bp";
       case "B": return "tier-b";
+      case "B-": return "tier-bm";
+      case "C+": return "tier-cp";
       case "C": return "tier-c";
+      case "C-": return "tier-cm";
+      case "D+": return "tier-dp";
+      case "D": return "tier-d";
+      case "D-": return "tier-dm";
+      case "E": return "tier-e";
       default: return "tier-na";
     }
   };
