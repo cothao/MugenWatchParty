@@ -103,7 +103,7 @@ function CharacterStats() {
               {stat.Tier || "N/A"}
             </span>
             {/* Portrait */}
-            {stat.Portrait && (
+            {stat.CharacterName && (
               <img
                 src={stat.CharacterName + ".jpg"}
                 alt={stat.CharacterName}
