@@ -87,7 +87,7 @@ export default function Index() {
         Character Stats
       </h2>
 
-      <div className="bg-card rounded-lg border border-border overflow-hidden max-h-[600px] overflow-y-auto">
+      <div className="max-h-[600px] overflow-y-auto border border-border rounded-lg">
         <CharacterStats />
       </div>
     </div>
