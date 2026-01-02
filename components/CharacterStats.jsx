@@ -35,6 +35,7 @@ function CharacterStats() {
           CharacterName,
           ...body.characters[CharacterName],
         }));
+        console.log("Fetched character data:", characters);
         setData(characters);
         setLoading(false);
       })
@@ -64,7 +65,7 @@ function CharacterStats() {
             Wins: item.Wins,
             Losses: item.Losses,
             WinRate: item.WinRate,
-            Tier: item.Tier
+            Tier: item.Tier,
           }));
           setData(characters);
         }
@@ -82,46 +83,59 @@ function CharacterStats() {
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <table className="stats-table table-fixed w-full">
-      <thead>
-        <tr>
-          <th className="w-2/3">Character</th>
-          <th className="w-1/6 text-center">W-L</th>
-          <th className="w-1/6 text-right">WR%</th>
-        </tr>
-      </thead>
+<table className="stats-table table-fixed w-full">
+  <thead>
+    <tr>
+      <th className="w-2/3">Character</th>
+      <th className="w-1/6 text-center">W-L</th>
+      <th className="w-1/6 text-right">WR%</th>
+    </tr>
+  </thead>
 
-      <tbody>
-        {data.map((stat, index) => (
-          <tr key={index}>
-            <td className="align-top">
-              <div className="flex items-start gap-2 min-w-0">
-                <span className={`tier-badge ${getTierColor(stat.Tier)} shrink-0`}>
-                  {stat.Tier || "N/A"}
-                </span>
-                <span className="text-sm font-medium text-foreground break-all">
-                  {stat.CharacterName}
-                </span>
-              </div>
-            </td>
+  <tbody>
+    {data.map((stat, index) => (
+      <tr key={index}>
+        <td className="align-top">
+          <div className="flex items-start gap-2 min-w-0">
 
-            <td className="text-center text-sm whitespace-nowrap">
-              <span className="text-[hsl(var(--success))]">{stat.Wins}</span>
-              <span className="text-muted-foreground mx-1">-</span>
-              <span className="text-error">{stat.Losses}</span>
-            </td>
+            {/* Tier Badge */}
+            <span className={`tier-badge ${getTierColor(stat.Tier)} shrink-0`}>
+              {stat.Tier || "N/A"}
+            </span>
+            {/* Portrait */}
+            {stat.Portrait && (
+              <img
+                src={stat.CharacterName + ".jpg"}
+                alt={stat.CharacterName}
+                className="w-10 h-10 rounded object-cover shrink-0"
+              />
+            )}
 
-            <td
-              className={`text-right text-sm font-bold whitespace-nowrap ${getWinRateColor(
-                stat.WinRate
-              )}`}
-            >
-              {typeof stat.WinRate === "number" ? `${stat.WinRate}%` : "N/A"}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+            {/* Character Name */}
+            <span className="text-sm font-medium text-foreground break-all">
+              {stat.CharacterName}
+            </span>
+          </div>
+        </td>
+
+        <td className="text-center text-sm whitespace-nowrap">
+          <span className="text-[hsl(var(--success))]">{stat.Wins}</span>
+          <span className="text-muted-foreground mx-1">-</span>
+          <span className="text-error">{stat.Losses}</span>
+        </td>
+
+        <td
+          className={`text-right text-sm font-bold whitespace-nowrap ${getWinRateColor(
+            stat.WinRate
+          )}`}
+        >
+          {typeof stat.WinRate === "number" ? `${stat.WinRate}%` : "N/A"}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
   );
 }
 
