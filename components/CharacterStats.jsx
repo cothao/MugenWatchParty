@@ -54,7 +54,9 @@ function CharacterStats() {
       case "D+": return "tier-dp";
       case "D": return "tier-d";
       case "D-": return "tier-dm";
+      case "E+": return "tier-ep";
       case "E": return "tier-e";
+      case "E-": return "tier-em";
       default: return "tier-na";
     }
   };

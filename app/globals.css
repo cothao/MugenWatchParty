@@ -221,8 +221,16 @@
     @apply bg-indigo-700/20 text-indigo-600 border border-indigo-700/30;
   }
 
+  .tier-ep {
+    @apply bg-purple-600/20 text-purple-500 border border-purple-600/30;
+  }
+
   .tier-e {
     @apply bg-purple-500/20 text-purple-400 border border-purple-500/30;
+  }
+
+  .tier-em {
+    @apply bg-purple-400/20 text-purple-300 border border-purple-400/30;
   }
 
   .tier-sss {
