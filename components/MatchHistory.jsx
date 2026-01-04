@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function CharacterCell({ character }) {
   return (
     <div className="flex items-center gap-2">
       <div className="w-8 h-8 bg-gradient-to-br from-primary/20 to-accent/20 rounded flex items-center justify-center text-sm border border-primary/20">
-        <img src={character.portrait} alt={character.name} />
+        <img src={character.portrait} alt={character.name} className="w-full h-full object-cover rounded" />
       </div>
       <span className="text-sm font-medium text-foreground">{character.name}</span>
     </div>
@@ -15,13 +15,7 @@ function CharacterCell({ character }) {
 
 function TeamDisplay({ team, isWinner }) {
   return (
-    <div
-      className={`space-y-2 p-3 rounded-lg ${
-        isWinner
-          ? "bg-success/10 border border-success/30"
-          : "bg-card/50"
-      }`}
-    >
+    <div className={`space-y-2 p-3 rounded-lg ${isWinner ? "bg-success/10 border border-success/30" : "bg-card/50"}`}>
       {team.map((character, idx) => (
         <CharacterCell key={idx} character={character} />
       ))}
@@ -32,43 +26,32 @@ function TeamDisplay({ team, isWinner }) {
 export default function MatchHistory() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const wsRef = useRef(null);
 
-  const sortMatches = (matchesArray) => {
-    return matchesArray.sort(
-      (a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt)
-    );
-  };
-
-  // Fetch initial matches
+  // Fetch initial match history from your API
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const res = await fetch(
-          "https://z9wgtvrk3h.execute-api.us-east-1.amazonaws.com/dev"
-        );
+        const res = await fetch("https://z9wgtvrk3h.execute-api.us-east-1.amazonaws.com/dev");
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         let data = await res.json();
         data = JSON.parse(data.body).matches;
 
-        const formatted = data.map((match) => ({
-          id: match.MatchID,
-          matchType: match.MatchType,
-          team1: match.Team1.map((name) => ({
-            name,
-            portrait: name + ".jpg",
-          })),
-          team2: match.Team2.map((name) => ({
-            name,
-            portrait: name + ".jpg",
-          })),
-          tierFought: match.TierFought,
-          winningTeam: match.Winner,
-          CreatedAt: match.CreatedAt, // keep this for sorting
-        }));
+        const formatted = data
+          .map((match) => ({
+            id: match.MatchID,
+            matchType: match.MatchType,
+            team1: match.Team1.map((name) => ({ name, portrait: name + ".jpg" })),
+            team2: match.Team2.map((name) => ({ name, portrait: name + ".jpg" })),
+            tierFought: match.TierFought,
+            winningTeam: match.Winner,
+            CreatedAt: match.CreatedAt,
+          }))
+          .sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt)); // Sort descending
 
-        setMatches(sortMatches(formatted));
+        setMatches(formatted);
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -80,94 +63,72 @@ export default function MatchHistory() {
     fetchMatches();
   }, []);
 
-  // Setup WebSocket
-  useEffect(() => {
-    wsRef.current = new WebSocket(
-      "wss://ypbp6hxepl.execute-api.us-east-1.amazonaws.com/production/"
-    );
+// useEffect(() => {
+//   const ws = new WebSocket(
+//     "wss://ypbp6hxepl.execute-api.us-east-1.amazonaws.com/production"
+//   );
+//   console.log(ws);
+//   ws.onopen = () => console.log("WebSocket connected");
+//   ws.onclose = () => console.log("WebSocket closed");
 
-    wsRef.current.onopen = () => {
-      console.log("WebSocket connected");
-    };
+//   ws.onmessage = (event) => {
+//     try {
+//       const msg = JSON.parse(event.data);
+//       console.log(msg);
+//       if (msg.type === "NEW_MATCH") {
+//         const match = msg.match;
 
-    wsRef.current.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
+//         const formattedMatch = {
+//           id: match.MatchID,
+//           matchType: match.MatchType,
+//           team1: match.Team1.map((n) => ({ name: n, portrait: n + ".jpg" })),
+//           team2: match.Team2.map((n) => ({ name: n, portrait: n + ".jpg" })),
+//           tierFought: match.TierFought,
+//           winningTeam: match.Winner,
+//           CreatedAt: match.CreatedAt,
+//         };
 
-    wsRef.current.onerror = (err) => {
-      console.error("WebSocket error:", err);
-    };
+// setMatches(prev => {
+//   const exists = prev.some(m => m.id === formattedMatch.id);
+//   if (exists) return prev;
 
-    wsRef.current.onmessage = (event) => {
-      try {
-        const msg = JSON.parse(event.data);
+//   return [formattedMatch, ...prev].sort(
+//     (a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt)
+//   );
+// });
 
-        if (msg.type === "NEW_MATCH") {
-          const match = msg.match;
-          const formattedMatch = {
-            id: match.MatchID,
-            matchType: match.MatchType,
-            team1: match.Team1.map((name) => ({
-              name,
-              portrait: name + ".jpg",
-            })),
-            team2: match.Team2.map((name) => ({
-              name,
-              portrait: name + ".jpg",
-            })),
-            tierFought: match.TierFought,
-            winningTeam: match.Winner,
-            CreatedAt: match.CreatedAt,
-          };
+//       }
+//     } catch (err) {
+//       console.error("Invalid WS message:", event.data);
+//     }
+//   };
+  
+//   ws.onerror = (e) => console.error("WebSocket error", e);
 
-          setMatches((prev) => sortMatches([formattedMatch, ...prev]));
-        }
-      } catch (err) {
-        console.error("Invalid WS message:", event.data, err);
-      }
-    };
+//   return () => ws.close();
 
-    return () => {
-      wsRef.current.close();
-    };
-  }, []);
+// }, []); // ✅ empty dependency array
 
   if (loading) return <p>Loading match history...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <div className="overflow-x-auto">
+    <div className="h-[600px] overflow-y-auto border border-border rounded">
       <table className="w-full">
         <thead>
           <tr className="border-b border-border">
-            <th className="px-6 py-4 text-left font-semibold text-muted-foreground">
-              Team 1
-            </th>
-            <th className="px-6 py-4 text-center font-semibold text-muted-foreground">
-              Match Type
-            </th>
-            <th className="px-6 py-4 text-left font-semibold text-muted-foreground">
-              Team 2
-            </th>
-            <th className="px-6 py-4 text-left font-semibold text-muted-foreground">
-              Tier
-            </th>
-            <th className="px-6 py-4 text-left font-semibold text-muted-foreground">
-              Winner
-            </th>
+            <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Team 1</th>
+            <th className="px-6 py-4 text-center font-semibold text-muted-foreground">Match Type</th>
+            <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Team 2</th>
+            <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Tier</th>
+            <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Winner</th>
           </tr>
         </thead>
         <tbody>
           {matches.map((match) => (
-            <tr
-              key={match.id}
-              className="border-b border-border hover:bg-secondary/5 transition-colors"
-            >
+            <tr key={match.id} className="border-b border-border hover:bg-secondary/5 transition-colors">
               <td className="px-6 py-4">
-                <TeamDisplay
-                  team={match.team1}
-                  isWinner={match.winningTeam === 1}
-                />
+                <TeamDisplay team={match.team1} isWinner={match.winningTeam === 1} />
               </td>
               <td className="px-6 py-4 text-center">
                 <span className="inline-block px-3 py-1 bg-secondary/30 text-foreground rounded font-bold text-sm">
@@ -175,10 +136,7 @@ export default function MatchHistory() {
                 </span>
               </td>
               <td className="px-6 py-4">
-                <TeamDisplay
-                  team={match.team2}
-                  isWinner={match.winningTeam === 2}
-                />
+                <TeamDisplay team={match.team2} isWinner={match.winningTeam === 2} />
               </td>
               <td className="px-6 py-4">
                 <span
@@ -197,9 +155,7 @@ export default function MatchHistory() {
               </td>
               <td className="px-6 py-4">
                 <div className="flex items-center gap-2">
-                  <span className="text-success font-bold">
-                    Team {match.winningTeam}
-                  </span>
+                  <span className="text-success font-bold">Team {match.winningTeam}</span>
                   <span className="text-success font-semibold text-lg">✓</span>
                 </div>
               </td>
