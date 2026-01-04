@@ -4,25 +4,9 @@ import { useState } from 'react';
 import BetCard from '../components/BetCard';
 import StreamViewer from '../components/StreamViewer';
 import CharacterStats from '../components/CharacterStats';
+import MatchSection from '../components/MatchSection';
 
-const mockCharacters = [
-  { id: 1, name: 'Ryu', odds: 1.85, tier: 'A' },
-  { id: 2, name: 'Ken', odds: 1.92, tier: 'A' },
-  { id: 3, name: 'Chun-Li', odds: 2.10, tier: 'B' },
-  { id: 4, name: 'Guile', odds: 2.35, tier: 'B' },
-  { id: 5, name: 'Blanka', odds: 2.50, tier: 'C' },
-];
 
-const mockStats = [
-  { name: 'Ryu', wins: 324, losses: 45, winRate: 87.8, tier: 'S' },
-  { name: 'Ken', wins: 298, losses: 52, winRate: 85.1, tier: 'A' },
-  { name: 'Chun-Li', wins: 276, losses: 68, winRate: 80.2, tier: 'A' },
-  { name: 'Guile', wins: 245, losses: 89, winRate: 73.4, tier: 'B' },
-  { name: 'Blanka', wins: 198, losses: 134, winRate: 59.6, tier: 'B' },
-  { name: 'E. Honda', wins: 167, losses: 165, winRate: 50.3, tier: 'C' },
-  { name: 'Dhalsim', wins: 142, losses: 189, winRate: 42.9, tier: 'C' },
-  { name: 'Zangief', wins: 128, losses: 203, winRate: 38.7, tier: 'D' },
-];
 
 export default function Index() {
   const [selectedCharacter, setSelectedCharacter] = useState(null);
@@ -64,7 +48,7 @@ export default function Index() {
         Available Bets
       </h2>
 
-      <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-card">
+      {/* <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-card">
         {mockCharacters.map((character) => (
           <BetCard
             key={character.id}
@@ -73,7 +57,7 @@ export default function Index() {
             onBet={handleBetPlaced}
           />
         ))}
-      </div>
+      </div> */}
     </div>
 
     {/* Center Stream */}
@@ -93,6 +77,7 @@ export default function Index() {
     </div>
 
   </div>
+  <MatchSection />
 </main>
 
     </div>

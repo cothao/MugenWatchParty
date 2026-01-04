@@ -7,6 +7,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      gridTemplateColumns: {
+        '16': 'repeat(16, minmax(0, 1fr))',
+      },
       colors: {
         background: 'hsl(225, 47%, 6%)',
         foreground: 'hsl(210, 38%, 95%)',
