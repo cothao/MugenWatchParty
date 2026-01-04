@@ -95,9 +95,9 @@ export default function ChooseNextMatch({ characters }) {
   };
 
 const handleStartMatch = async () => {
-  const Team1 = selectedLeft.filter(Boolean).map(c => c.CharacterName);
-  const Team2 = selectedRight.filter(Boolean).map(c => c.CharacterName);
-  
+  const Team1 = selectedLeft.filter(Boolean).map((c) => c.CharacterName);
+  const Team2 = selectedRight.filter(Boolean).map((c) => c.CharacterName);
+
   if (!Team1.length || !Team2.length) return;
 
   try {
@@ -109,13 +109,19 @@ const handleStartMatch = async () => {
         body: JSON.stringify({
           Team1,
           Team2,
-          MatchType: matchType
+          MatchType: matchType,
         }),
       }
     );
 
     const data = await res.json();
     console.log("Match queued:", data);
+
+    // Reset team selections after successful submit
+    const config = matchTypes.find((m) => m.id === matchType);
+    setSelectedLeft(createEmptySlots(config.leftCount));
+    setSelectedRight(createEmptySlots(config.rightCount));
+    setActiveSlot(null);
   } catch (err) {
     console.error("Failed to queue match:", err);
   }
@@ -147,13 +153,17 @@ const handleStartMatch = async () => {
 
         <div className="flex flex-col items-center justify-center">
           <div className="text-3xl font-black">VS</div>
-<button
-  disabled={!isReadyToStart}
-  onClick={handleStartMatch}
-  className="mt-4 px-6 py-3 bg-success text-white rounded disabled:opacity-50"
->
-  Start Match
-</button>
+          <button
+            disabled={!isReadyToStart}
+            onClick={handleStartMatch}
+            className={`mt-4 px-6 py-3 rounded font-bold transition-colors ${
+              isReadyToStart
+                ? "bg-[hsl(var(--success))] text-white hover:bg-[hsl(var(--success))]/90"
+                : "bg-muted text-muted-foreground cursor-not-allowed"
+            }`}
+          >
+            Start Match
+          </button>
 
         </div>
 

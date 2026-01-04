@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import MatchHistory from './MatchHistory';
 import ChooseNextMatch from './ChooseNextMatch';
+import QueuedMatchesTable from './QueuedMatchesTable';
 import { useCharacters } from "../hooks/useCharacters";
 
 export default function MatchSection() {
@@ -13,6 +14,7 @@ export default function MatchSection() {
   const tabs = [
     { id: 'history', label: 'Match History' },
     { id: 'choose', label: 'Choose Next Match' },
+    { id: 'queued', label: 'Queued Matches' },
   ];
 
   return (
@@ -39,6 +41,7 @@ export default function MatchSection() {
         <div className="p-6">
           {activeTab === 'history' && <MatchHistory />}
           {activeTab === 'choose' && <ChooseNextMatch characters={characters} />}
+          {activeTab === 'queued' && <QueuedMatchesTable characters={characters} />}
         </div>
       </div>
     </div>
