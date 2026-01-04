@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 function CharacterCell({ character }) {
   return (
@@ -33,7 +33,15 @@ export default function MatchHistory() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const wsRef = useRef(null);
 
+  const sortMatches = (matchesArray) => {
+    return matchesArray.sort(
+      (a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt)
+    );
+  };
+
+  // Fetch initial matches
   useEffect(() => {
     const fetchMatches = async () => {
       try {
@@ -43,8 +51,7 @@ export default function MatchHistory() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         let data = await res.json();
         data = JSON.parse(data.body).matches;
-        console.log(data);
-        // Format the data like your mockMatchHistory
+
         const formatted = data.map((match) => ({
           id: match.MatchID,
           matchType: match.MatchType,
@@ -58,9 +65,10 @@ export default function MatchHistory() {
           })),
           tierFought: match.TierFought,
           winningTeam: match.Winner,
+          CreatedAt: match.CreatedAt, // keep this for sorting
         }));
 
-        setMatches(formatted);
+        setMatches(sortMatches(formatted));
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -70,6 +78,58 @@ export default function MatchHistory() {
     };
 
     fetchMatches();
+  }, []);
+
+  // Setup WebSocket
+  useEffect(() => {
+    wsRef.current = new WebSocket(
+      "wss://ypbp6hxepl.execute-api.us-east-1.amazonaws.com/production/"
+    );
+
+    wsRef.current.onopen = () => {
+      console.log("WebSocket connected");
+    };
+
+    wsRef.current.onclose = () => {
+      console.log("WebSocket disconnected");
+    };
+
+    wsRef.current.onerror = (err) => {
+      console.error("WebSocket error:", err);
+    };
+
+    wsRef.current.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+
+        if (msg.type === "NEW_MATCH") {
+          const match = msg.match;
+          const formattedMatch = {
+            id: match.MatchID,
+            matchType: match.MatchType,
+            team1: match.Team1.map((name) => ({
+              name,
+              portrait: name + ".jpg",
+            })),
+            team2: match.Team2.map((name) => ({
+              name,
+              portrait: name + ".jpg",
+            })),
+            tierFought: match.TierFought,
+            winningTeam: match.Winner,
+            CreatedAt: match.CreatedAt,
+          };
+
+          setMatches((prev) => sortMatches([formattedMatch, ...prev]));
+        }
+      } catch (err) {
+        console.error("Invalid WS message:", event.data, err);
+      }
+    };
+
+    return () => {
+      wsRef.current.close();
+    };
   }, []);
 
   if (loading) return <p>Loading match history...</p>;
@@ -103,30 +163,23 @@ export default function MatchHistory() {
               key={match.id}
               className="border-b border-border hover:bg-secondary/5 transition-colors"
             >
-              {/* Team 1 */}
               <td className="px-6 py-4">
                 <TeamDisplay
                   team={match.team1}
                   isWinner={match.winningTeam === 1}
                 />
               </td>
-
-              {/* Match Type */}
               <td className="px-6 py-4 text-center">
                 <span className="inline-block px-3 py-1 bg-secondary/30 text-foreground rounded font-bold text-sm">
                   {match.matchType}
                 </span>
               </td>
-
-              {/* Team 2 */}
               <td className="px-6 py-4">
                 <TeamDisplay
                   team={match.team2}
                   isWinner={match.winningTeam === 2}
                 />
               </td>
-
-              {/* Tier */}
               <td className="px-6 py-4">
                 <span
                   className={`inline-block px-3 py-1 rounded font-semibold text-xs uppercase tracking-wider ${
@@ -142,8 +195,6 @@ export default function MatchHistory() {
                   {match.tierFought}
                 </span>
               </td>
-
-              {/* Winner */}
               <td className="px-6 py-4">
                 <div className="flex items-center gap-2">
                   <span className="text-success font-bold">
