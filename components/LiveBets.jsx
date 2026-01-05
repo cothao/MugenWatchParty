@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import BetCard from "./BetCard";
 import { useCharacters } from "../hooks/useCharacters";
-import { useReconnectingWebSocket } from "../hooks/useReconnectingWebSocket";
 
 const WS_URL = "wss://h0j6o23mx2.execute-api.us-east-1.amazonaws.com/production";
 const INITIAL_API_URL = "https://t0nsl0w8se.execute-api.us-east-1.amazonaws.com/dev";
@@ -14,6 +13,7 @@ export default function LiveBets({ selectedCharacter, onBet }) {
   const [latestMatch, setLatestMatch] = useState(null);
   const [bettingOpen, setBettingOpen] = useState(false);
   const prevBettingOpenRef = useRef(bettingOpen);
+  const wsRef = useRef(null);
 
   // Initial REST fetch to get the latest existing queued match
   useEffect(() => {
@@ -53,9 +53,32 @@ export default function LiveBets({ selectedCharacter, onBet }) {
     };
   }, []);
 
-  // WebSocket message handler (stable via useCallback)
-  const handleWsMessage = useCallback(
-    (event) => {
+  // Direct WebSocket connection just for this component
+  useEffect(() => {
+    let isMounted = true;
+
+    const ws = new WebSocket(WS_URL);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log("LiveBets WebSocket connected");
+    };
+
+    ws.onclose = (event) => {
+      console.log(
+        "LiveBets WebSocket closed",
+        event.code,
+        event.reason || ""
+      );
+    };
+
+    ws.onerror = (event) => {
+      console.error("LiveBets WebSocket error", event);
+    };
+
+    ws.onmessage = (event) => {
+      if (!isMounted) return;
+
       try {
         const msg = JSON.parse(event.data);
         console.log("LiveBets message", msg);
@@ -63,8 +86,6 @@ export default function LiveBets({ selectedCharacter, onBet }) {
         // If record was deleted from currentmatch table, close betting but keep info
         if (msg?.type === "DELETED_RECORD") {
           setBettingOpen(false);
-          // Optionally update latestMatch from deleted data if needed:
-          // if (msg.data) setLatestMatch((prev) => prev ?? msg.data);
           return;
         }
 
@@ -103,18 +124,20 @@ export default function LiveBets({ selectedCharacter, onBet }) {
       } catch (e) {
         console.error("Failed to parse LiveBets message", event.data, e);
       }
-    },
-    [setLatestMatch, setBettingOpen]
-  );
+    };
 
-  // Use reconnecting WebSocket
-  useReconnectingWebSocket(WS_URL, {
-    onMessage: handleWsMessage,
-    // Optional logging callbacks if you want:
-    // onOpen: () => console.log("LiveBets WebSocket connected"),
-    // onClose: (e) => console.log("LiveBets WebSocket disconnected", e.code, e.reason),
-    // onError: (e) => console.error("LiveBets WebSocket error", e),
-  });
+    return () => {
+      isMounted = false;
+      if (wsRef.current) {
+        try {
+          wsRef.current.close();
+        } catch {
+          // ignore
+        }
+        wsRef.current = null;
+      }
+    };
+  }, []);
 
   // When betting closes, submit the stored bet
   useEffect(() => {

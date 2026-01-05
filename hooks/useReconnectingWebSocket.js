@@ -2,6 +2,65 @@
 
 import { useEffect, useRef } from "react";
 
+// One shared entry per URL
+const socketEntries = new Map();
+
+function connect(entry, url) {
+  const ws = new WebSocket(url);
+  entry.ws = ws;
+
+  ws.onopen = (event) => {
+    entry.listeners.forEach((listener) => {
+      listener.onOpenRef.current?.(event);
+    });
+  };
+
+  ws.onclose = (event) => {
+    entry.listeners.forEach((listener) => {
+      listener.onCloseRef.current?.(event);
+    });
+
+    if (entry.shouldReconnect) {
+      entry.reconnectTimeout = setTimeout(
+        () => connect(entry, url),
+        entry.reconnectDelay
+      );
+    }
+  };
+
+  ws.onerror = (event) => {
+    entry.listeners.forEach((listener) => {
+      listener.onErrorRef.current?.(event);
+    });
+    // Do not force-close here; let server decide
+  };
+
+  ws.onmessage = (event) => {
+    entry.listeners.forEach((listener) => {
+      listener.onMessageRef.current?.(event);
+    });
+  };
+}
+
+function ensureEntry(url, reconnectDelay) {
+  let entry = socketEntries.get(url);
+  if (!entry) {
+    entry = {
+      ws: null,
+      reconnectDelay,
+      listeners: new Set(),
+      shouldReconnect: true,
+      reconnectTimeout: null,
+    };
+    socketEntries.set(url, entry);
+    connect(entry, url);
+  } else {
+    // Keep latest delay if changed
+    entry.reconnectDelay = reconnectDelay;
+  }
+  return entry;
+}
+
 export function useReconnectingWebSocket(
   url,
   {
@@ -12,57 +71,54 @@ export function useReconnectingWebSocket(
     reconnectDelay = 3000,
   } = {}
 ) {
-  const wsRef = useRef(null);
-  const shouldReconnectRef = useRef(true);
-  const reconnectTimeoutRef = useRef(null);
+  const listenerRef = useRef({
+    onMessageRef: { current: onMessage },
+    onOpenRef: { current: onOpen },
+    onCloseRef: { current: onClose },
+    onErrorRef: { current: onError },
+  });
+
+  // Keep latest handlers in refs
+  useEffect(() => {
+    listenerRef.current.onMessageRef.current = onMessage;
+  }, [onMessage]);
 
   useEffect(() => {
-    function connect() {
-      const ws = new WebSocket(url);
-      wsRef.current = ws;
+    listenerRef.current.onOpenRef.current = onOpen;
+  }, [onOpen]);
 
-      ws.onopen = (event) => {
-        onOpen?.(event);
-      };
+  useEffect(() => {
+    listenerRef.current.onCloseRef.current = onClose;
+  }, [onClose]);
 
-      ws.onclose = (event) => {
-        onClose?.(event);
-        if (shouldReconnectRef.current) {
-          reconnectTimeoutRef.current = setTimeout(connect, reconnectDelay);
-        }
-      };
+  useEffect(() => {
+    listenerRef.current.onErrorRef.current = onError;
+  }, [onError]);
 
-      ws.onerror = (event) => {
-        onError?.(event);
-        try {
-          ws.close();
-        } catch {
-          // ignore
-        }
-      };
+  useEffect(() => {
+    if (!url) return;
 
-      ws.onmessage = (event) => {
-        onMessage?.(event);
-      };
-    }
-
-    connect();
+    const entry = ensureEntry(url, reconnectDelay);
+    entry.listeners.add(listenerRef.current);
 
     return () => {
-      shouldReconnectRef.current = false;
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-      if (wsRef.current) {
-        try {
-          wsRef.current.close();
-        } catch {
-          // ignore
+      entry.listeners.delete(listenerRef.current);
+
+      if (entry.listeners.size === 0) {
+        entry.shouldReconnect = false;
+        if (entry.reconnectTimeout) {
+          clearTimeout(entry.reconnectTimeout);
         }
-        wsRef.current = null;
+        if (entry.ws) {
+          try {
+            entry.ws.close();
+          } catch {
+            // ignore
+          }
+          entry.ws = null;
+        }
+        socketEntries.delete(url);
       }
     };
-  }, [url, reconnectDelay, onMessage, onOpen, onClose, onError]);
-
-  return wsRef;
+  }, [url, reconnectDelay]);
 }
