@@ -1,22 +1,81 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import BetCard from '../components/BetCard';
 import StreamViewer from '../components/StreamViewer';
 import CharacterStats from '../components/CharacterStats';
 import MatchSection from '../components/MatchSection';
+import LiveBets from '../components/LiveBets';
 
 
 
 export default function Index() {
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [betAmount, setBetAmount] = useState('');
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem("user");
+    if (!stored) return;
+    try {
+      const parsed = JSON.parse(stored);
+      setCurrentUser(parsed);
+    } catch {
+      setCurrentUser(stored);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("user");
+      // clear local state
+      setCurrentUser(null);
+      // refresh main page
+      window.location.reload();
+    }
+  };
 
   const handleBetPlaced = (character, amount) => {
     setSelectedCharacter(character);
     setBetAmount(amount);
     // In a real app, this would send the bet to the server
     console.log(`Bet placed: ${amount} on ${character.name} at ${character.odds}`);
+
+    if (typeof window !== "undefined") {
+      let username = null;
+      if (currentUser) {
+        username =
+          currentUser.username ||
+          currentUser.email ||
+          (typeof currentUser === "string" ? currentUser : null);
+      } else {
+        try {
+          const stored = window.localStorage.getItem("user");
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            username =
+              parsed.username ||
+              parsed.email ||
+              (typeof parsed === "string" ? parsed : null);
+          }
+        } catch {
+          // ignore
+        }
+      }
+
+      if (!username) username = "Guest";
+
+      window.localStorage.setItem(
+        "currentBet",
+        JSON.stringify({
+          username,
+          team: character.team || null,
+          amount,
+        })
+      );
+    }
   };
 
   return (
@@ -31,8 +90,34 @@ export default function Index() {
               </div>
               <h1 className="text-2xl font-bold text-foreground">MugenBets</h1>
             </div>
-            <div className="text-sm text-muted-foreground">
-              Live Streaming
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <span>Live Streaming</span>
+              {currentUser ? (
+                <div className="flex items-center gap-3">
+                  <span>
+                    Hello!{" "}
+                    {currentUser.username ||
+                      currentUser.email ||
+                      currentUser}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="px-2 py-1 text-xs border border-border rounded hover:bg-muted"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <Link href="/login" className="text-primary hover:underline">
+                    Login
+                  </Link>
+                  <Link href="/create-user" className="text-primary hover:underline">
+                    Create Account
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -48,16 +133,10 @@ export default function Index() {
         Available Bets
       </h2>
 
-      {/* <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-card">
-        {mockCharacters.map((character) => (
-          <BetCard
-            key={character.id}
-            character={character}
-            isSelected={selectedCharacter?.id === character.id}
-            onBet={handleBetPlaced}
-          />
-        ))}
-      </div> */}
+      <LiveBets
+        selectedCharacter={selectedCharacter}
+        onBet={handleBetPlaced}
+      />
     </div>
 
     {/* Center Stream */}

@@ -1,4 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+"use client";
+
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { useReconnectingWebSocket } from "../hooks/useReconnectingWebSocket";
 
 /* ---------------- Tier helpers ---------------- */
 
@@ -22,6 +25,10 @@ const tierRank = (tier) => {
   const idx = TIER_ORDER.indexOf(t);
   return idx === -1 ? TIER_ORDER.length : idx;
 };
+
+/* ---------- WebSocket URL ---------- */
+
+const WS_URL = "wss://nhjft1ry2h.execute-api.us-east-1.amazonaws.com/production";
 
 /* ---------------- Component ---------------- */
 
@@ -93,28 +100,25 @@ function CharacterStats() {
 
   /* ---------- WebSocket updates ---------- */
 
-  useEffect(() => {
-    const ws = new WebSocket(
-      "wss://nhjft1ry2h.execute-api.us-east-1.amazonaws.com/production"
-    );
-
-    ws.onopen = () => console.log("WebSocket connected");
-    ws.onclose = () => console.log("WebSocket disconnected");
-
-    ws.onmessage = (event) => {
+  const handleWsMessage = useCallback(
+    (event) => {
       try {
         const msg = JSON.parse(event.data);
+        console.log("CharacterStats message", msg);
+
         if (msg.type === "STATS_UPDATE") {
           setData(msg.data);
         }
-      } catch {
-        console.error("Invalid WS message:", event.data);
+      } catch (e) {
+        console.error("Failed to parse CharacterStats message", event.data, e);
       }
-    };
+    },
+    []
+  );
 
-    ws.onerror = (err) => console.error("WebSocket error:", err);
-    return () => ws.close();
-  }, []);
+  useReconnectingWebSocket(WS_URL, {
+    onMessage: handleWsMessage,
+  });
 
   /* ---------- Filtered + sorted data ---------- */
 
